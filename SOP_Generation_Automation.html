@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOP Generator — Kores Digital Transformation (Gemini)</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F3;
+    --surface: #FFFFFF;
+    --surface2: #F0EEE9;
+    --border: #E2DFD8;
+    --border-strong: #C8C4BC;
+    --text: #1A1916;
+    --text-muted: #6B6860;
+    --text-hint: #9B9890;
+    --accent: #1D5FA8;
+    --accent-light: #E8F1FB;
+    --accent-mid: #3B82D4;
+    --success: #1A6B3C;
+    --success-bg: #E8F5EE;
+    --warning: #7A4B0A;
+    --warning-bg: #FEF3E2;
+    --danger: #991B1B;
+    --danger-bg: #FEF2F2;
+    --font: 'Inter', system-ui, -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', 'Fira Code', monospace;
+    --radius: 8px;
+    --radius-lg: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111110;
+      --surface: #1C1B19;
+      --surface2: #242320;
+      --border: #2E2D2A;
+      --border-strong: #403E3A;
+      --text: #F0EDE8;
+      --text-muted: #9B9890;
+      --text-hint: #6B6860;
+      --accent: #5BA3E8;
+      --accent-light: #0D2A45;
+      --accent-mid: #3B82D4;
+      --success: #4ADE80;
+      --success-bg: #0A2E1C;
+      --warning: #FCD34D;
+      --warning-bg: #2D1F05;
+      --danger: #F87171;
+      --danger-bg: #2D0A0A;
+    }
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  .topbar-brand .logo {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .topbar-brand .logo svg { width: 16px; height: 16px; fill: white; }
+  .topbar-tag {
+    font-size: 11px;
+    background: var(--accent-light);
+    color: var(--accent);
+    padding: 3px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+  }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ── LEFT PANEL ── */
+  .panel-left {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 56px);
+    position: sticky;
+    top: 56px;
+    overflow-y: auto;
+  }
+  .panel-section {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .panel-section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    margin-bottom: 0.75rem;
+  }
+
+  /* API Key */
+  .api-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .api-row input {
+    flex: 1;
+    height: 36px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 13px;
+    padding: 0 10px;
+    font-family: var(--mono);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .api-row input:focus { border-color: var(--accent-mid); }
+  .api-status {
+    font-size: 12px;
+    color: var(--text-hint);
+    margin-top: 6px;
+  }
+  .api-status.ok { color: var(--success); }
+  .api-status.err { color: var(--danger); }
+
+  /* Demo buttons */
+  .demo-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .demo-btn {
+    width: 100%;
+    text-align: left;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .demo-btn:hover {
+    background: var(--accent-light);
+    border-color: var(--accent-mid);
+    color: var(--accent);
+  }
+  .demo-btn .demo-tag {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    display: block;
+    margin-bottom: 2px;
+  }
+  .demo-btn:hover .demo-tag { color: var(--accent-mid); }
+
+  /* Notes textarea */
+  .notes-area {
+    width: 100%;
+    min-height: 160px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+    padding: 10px 12px;
+    font-family: var(--font);
+    resize: vertical;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .notes-area:focus { border-color: var(--accent-mid); }
+
+  /* Meta fields */
+  .meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .field-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .field-wrap label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+  .field-wrap input, .field-wrap select {
+    height: 34px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 13px;
+    padding: 0 10px;
+    outline: none;
+    font-family: var(--font);
+    transition: border-color 0.15s;
+  }
+  .field-wrap input:focus, .field-wrap select:focus { border-color: var(--accent-mid); }
+
+  /* Generate button */
+  .btn-generate {
+    width: 100%;
+    height: 42px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.2px;
+  }
+  .btn-generate:hover { filter: brightness(1.1); }
+  .btn-generate:active { transform: scale(0.98); }
+  .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; filter: none; }
+  .btn-generate svg { width: 16px; height: 16px; }
+
+  /* Spinner */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  /* ── RIGHT PANEL ── */
+  .panel-right {
+    padding: 2rem;
+    overflow-y: auto;
+  }
+
+  /* Empty state */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    text-align: center;
+    color: var(--text-muted);
+    gap: 12px;
+  }
+  .empty-icon {
+    width: 56px; height: 56px;
+    background: var(--surface2);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 4px;
+  }
+  .empty-icon svg { width: 28px; height: 28px; color: var(--text-hint); }
+  .empty-state h2 { font-size: 18px; font-weight: 600; color: var(--text); }
+  .empty-state p { font-size: 14px; max-width: 340px; line-height: 1.6; }
+
+  /* Loading state */
+  .loading-state {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 16px;
+    color: var(--text-muted);
+  }
+  .loading-ring {
+    width: 40px; height: 40px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  .loading-steps { display: flex; flex-direction: column; gap: 6px; align-items: center; }
+  .loading-step {
+    font-size: 13px;
+    color: var(--text-hint);
+    transition: color 0.3s;
+  }
+  .loading-step.active { color: var(--accent); font-weight: 500; }
+  .loading-step.done { color: var(--success); }
+
+  /* SOP Output */
+  .sop-output { display: none; }
+
+  /* Header card */
+  .sop-header-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .sop-doc-id {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    margin-bottom: 6px;
+  }
+  .sop-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .sop-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .sop-badge {
+    font-size: 12px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+    background: var(--surface2);
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+  .sop-badge.accent {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: transparent;
+  }
+  .sop-purpose {
+    font-size: 14px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Action bar */
+  .action-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .btn-action {
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 6px;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .btn-action:hover {
+    background: var(--surface2);
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+  .btn-action svg { width: 14px; height: 14px; }
+
+  /* Section cards */
+  .sop-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 1rem;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+  }
+  .sop-section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 1.25rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  .section-icon {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .section-icon svg { width: 14px; height: 14px; }
+  .section-icon.blue { background: var(--accent-light); color: var(--accent); }
+  .section-icon.green { background: var(--success-bg); color: var(--success); }
+  .section-icon.amber { background: var(--warning-bg); color: var(--warning); }
+  .section-icon.red { background: var(--danger-bg); color: var(--danger); }
+  .sop-section-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: 0.1px;
+  }
+  .sop-section-body { padding: 1.25rem; }
+
+  /* Scope table */
+  .scope-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .scope-box {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+  }
+  .scope-box h4 {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--text-hint);
+    margin-bottom: 6px;
+  }
+  .scope-box ul { padding-left: 14px; }
+  .scope-box li { font-size: 13px; color: var(--text-muted); margin-bottom: 3px; line-height: 1.5; }
+
+  /* Roles */
+  .roles-list { display: flex; flex-direction: column; gap: 8px; }
+  .role-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .role-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: var(--accent-light);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .role-name { font-size: 13px; font-weight: 600; color: var(--text); }
+  .role-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.5; }
+
+  /* Steps */
+  .steps-list { display: flex; flex-direction: column; gap: 0; }
+  .step-row {
+    display: flex;
+    gap: 14px;
+    position: relative;
+  }
+  .step-row:not(:last-child) .step-line { display: block; }
+  .step-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+    width: 28px;
+  }
+  .step-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .step-line {
+    display: none;
+    width: 2px;
+    flex: 1;
+    background: var(--border);
+    margin: 4px 0;
+    min-height: 16px;
+  }
+  .step-content {
+    padding-bottom: 20px;
+    flex: 1;
+    padding-top: 4px;
+  }
+  .step-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .step-detail { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+  .step-responsible {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+
+  /* KPIs */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .kpi-card {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 12px;
+    border: 1px solid var(--border);
+    text-align: center;
+  }
+  .kpi-value { font-size: 20px; font-weight: 700; color: var(--accent); }
+  .kpi-label { font-size: 12px; color: var(--text-muted); margin-top: 2px; line-height: 1.4; }
+
+  /* Exceptions */
+  .exception-list { display: flex; flex-direction: column; gap: 8px; }
+  .exception-row {
+    display: flex;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--warning-bg);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    border-left: 3px solid #E59A1A;
+  }
+  .exception-row.danger {
+    background: var(--danger-bg);
+    border-left-color: #DC2626;
+  }
+  .exc-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .exc-action { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+
+  /* Flowchart */
+  .flowchart-wrap {
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 1rem;
+    border: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .flowchart-wrap .mermaid { min-width: 200px; }
+
+  /* Error toast */
+  .error-toast {
+    display: none;
+    background: var(--danger-bg);
+    border: 1px solid #FCA5A5;
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--danger);
+    margin-bottom: 1rem;
+  }
+
+  @media print {
+    .topbar, .panel-left { display: none; }
+    .layout { display: block; }
+    .panel-right { padding: 0; }
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .panel-left { position: static; height: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<nav class="topbar">
+  <a class="topbar-brand" href="#">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+      </svg>
+    </div>
+    SOP Generator
+  </a>
+  <span class="topbar-tag">Digital Transformation Cell</span>
+</nav>
+
+<div class="layout">
+
+  <!-- LEFT PANEL -->
+  <aside class="panel-left">
+
+    <!-- API Key -->
+    <div class="panel-section">
+      <div class="section-label">OpenRouter API Key (Free)</div>
+      <div class="api-row">
+        <input type="text" id="apiKey" placeholder="Paste your sk-or-v1-... key here" autocomplete="off" style="font-family:var(--mono);font-size:12px;">
+      </div>
+      <div class="api-status" id="apiStatus">Get free key at openrouter.ai</div>
+    </div>
+
+    <!-- Demo Scenarios -->
+    <div class="panel-section">
+      <div class="section-label">Load a demo scenario</div>
+      <div class="demo-grid">
+        <button class="demo-btn" onclick="loadDemo('injection')">
+          <span class="demo-tag">Foundry · Mechanical</span>
+          Die changeover on injection moulding machine
+        </button>
+        <button class="demo-btn" onclick="loadDemo('incoming')">
+          <span class="demo-tag">Warehouse · Quality</span>
+          Incoming raw material inspection
+        </button>
+        <button class="demo-btn" onclick="loadDemo('shift')">
+          <span class="demo-tag">Shift Operations</span>
+          Shift handover & logbook at pharma plant
+        </button>
+      </div>
+    </div>
+
+    <!-- Raw Notes -->
+    <div class="panel-section">
+      <div class="section-label">Raw process notes</div>
+      <textarea class="notes-area" id="rawNotes" placeholder="Paste your messy notes here — bullet points, voice memo transcript, WhatsApp messages, whatever. The AI will convert them into a structured SOP.&#10;&#10;Example: operator checks pressure gauge then opens valve... sometimes they forget step 3 when its a night shift..."></textarea>
+    </div>
+
+    <!-- Metadata -->
+    <div class="panel-section">
+      <div class="section-label">Document metadata</div>
+      <div class="meta-grid">
+        <div class="field-wrap">
+          <label>Plant / Site</label>
+          <input type="text" id="metaPlant" placeholder="e.g. Thane Unit 2">
+        </div>
+        <div class="field-wrap">
+          <label>Department</label>
+          <input type="text" id="metaDept" placeholder="e.g. Production">
+        </div>
+        <div class="field-wrap">
+          <label>Author</label>
+          <input type="text" id="metaAuthor" placeholder="Your name">
+        </div>
+        <div class="field-wrap">
+          <label>Industry</label>
+          <select id="metaIndustry">
+            <option value="Manufacturing">Manufacturing</option>
+            <option value="Foundry">Foundry</option>
+            <option value="Pharmaceutical">Pharmaceutical</option>
+            <option value="Stationery">Stationery</option>
+            <option value="Warehouse">Warehouse</option>
+            <option value="Engineering">Engineering</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Generate -->
+    <div class="panel-section">
+      <div id="errorToast" class="error-toast"></div>
+      <button class="btn-generate" id="generateBtn" onclick="generateSOP()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+        Generate SOP
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- RIGHT PANEL -->
+  <main class="panel-right" id="rightPanel">
+
+    <!-- Empty state -->
+    <div class="empty-state" id="emptyState">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+        </svg>
+      </div>
+      <h2>No SOP generated yet</h2>
+      <p>Paste raw process notes on the left — voice memo transcripts, WhatsApp messages, bullet points — and click Generate SOP.</p>
+      <p style="font-size:13px; color: var(--text-hint); margin-top: 4px;">Or load one of the three demo scenarios to see the tool in action.</p>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading-state" id="loadingState">
+      <div class="loading-ring"></div>
+      <div class="loading-steps">
+        <div class="loading-step" id="ls1">Reading process notes…</div>
+        <div class="loading-step" id="ls2">Extracting steps, roles and exceptions…</div>
+        <div class="loading-step" id="ls3">Building flowchart…</div>
+        <div class="loading-step" id="ls4">Formatting your SOP document…</div>
+      </div>
+    </div>
+
+    <!-- SOP Output -->
+    <div class="sop-output" id="sopOutput">
+
+      <!-- Header -->
+      <div class="sop-header-card">
+        <div class="sop-doc-id" id="outDocId">SOP-001 · v1.0</div>
+        <div class="sop-title" id="outTitle">Standard Operating Procedure</div>
+        <div class="sop-meta-row" id="outMeta"></div>
+        <div class="sop-purpose" id="outPurpose"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="action-bar">
+        <button class="btn-action" onclick="window.print()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          Print / Save PDF
+        </button>
+        <button class="btn-action" onclick="copyJSON()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy JSON
+        </button>
+        <button class="btn-action" onclick="downloadMarkdown()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download .md
+        </button>
+      </div>
+
+      <!-- Scope -->
+      <div class="sop-section">
+        <div class="sop-section-header">
+          <div class="section-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+          </div>
+          <span class="sop-section-title">Scope</span>
+        </div>
+        <div class="sop-section-body">
+          <div class="scope-grid">
+            <div class="scope-box">
+              <h4>In scope</h4>
+              <ul id="outInScope"></ul>
+            </div>
+            <div class="scope-box">
+              <h4>Out of scope</h4>
+              <ul id="outOutScope"></ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Roles -->
+      <div class="sop-section">
+        <div class="sop-section-header">
+          <div class="section-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+          </div>
+          <span class="sop-section-title">Roles & responsibilities</span>
+        </div>
+        <div class="sop-section-body">
+          <div class="roles-list" id="outRoles"></div>
+        </div>
+      </div>
+
+      <!-- Steps -->
+      <div class="sop-section">
+        <div class="sop-section-header">
+          <div class="section-icon green">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          </div>
+          <span class="sop-section-title">Step-by-step procedure</span>
+        </div>
+        <div class="sop-section-body">
+          <div class="steps-list" id="outSteps"></div>
+        </div>
+      </div>
+
+      <!-- KPIs -->
+      <div class="sop-section">
+        <div class="sop-section-header">
+          <div class="section-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          </div>
+          <span class="sop-section-title">KPIs & quality checkpoints</span>
+        </div>
+        <div class="sop-section-body">
+          <div class="kpi-grid" id="outKPIs"></div>
+        </div>
+      </div>
+
+      <!-- Exceptions -->
+      <div class="sop-section">
+        <div class="sop-section-header">
+          <div class="section-icon amber">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <span class="sop-section-title">Exception handling</span>
+        </div>
+        <div class="sop-section-body">
+          <div class="exception-list" id="outExceptions"></div>
+        </div>
+      </div>
+
+      <!-- Flowchart -->
+      <div class="sop-section">
+        <div class="sop-section-header">
+          <div class="section-icon blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="9" y="15" width="6" height="6" rx="1"/><path d="M9 6h6M6 9v6h3M18 9v3.5a2.5 2.5 0 01-2.5 2.5H15"/></svg>
+          </div>
+          <span class="sop-section-title">Process flowchart</span>
+        </div>
+        <div class="sop-section-body">
+          <div class="flowchart-wrap">
+            <div class="mermaid" id="outFlowchart"></div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /sop-output -->
+  </main>
+</div>
+
+<script>
+mermaid.initialize({ startOnLoad: false, theme: 'neutral', securityLevel: 'loose' });
+
+// ── DEMO DATA ──
+const DEMOS = {
+  injection: {
+    notes: `talked to ramesh (machine operator) and supervisor krishna at thane unit 2
+
+- operator arrives 30 mins before shift, checks if previous job is still running
+- if yes, wait for cycle to complete, log time in register
+- machine has to be cooled down first - usually takes 15-20 mins, sometimes operator skips this if supervisor not watching and it damages the mould
+- disconnect hydraulics - 2 bolts on each side
+- remove old mould using overhead crane - need 2 people always, safety rule
+- clean platens with rag + solvent (sometimes they use wrong solvent, vedanta pointed this out)
+- new mould comes from mould storage - krishna signs the mould release form
+- install new mould, connect hydraulics
+- set parameters on touchscreen - temp, pressure, cycle time - these come from the job card
+- run 3 trial shots, check dimensions with vernier
+- if ok, production supervisor signs off and production begins
+- exceptions: if dimensions off, call quality dept, dont start production. if crane unavailable, dont try to manually lift mould (happened once, almost accident)
+- whole changeover should take max 45 mins. if >45 mins krishna wants to know why`,
+    plant: 'Thane Unit 2', dept: 'Production', industry: 'Foundry'
+  },
+  incoming: {
+    notes: `raw material inspection at warehouse - spoke with gopal (quality inspector) and ravi (store incharge)
+
+supplier truck arrives at gate, security logs vehicle number and time
+ravi checks if PO exists in SAP for this material - if not, material is held at gate, purchasing is called
+material unloaded to inspection bay (not directly to store)
+gopal picks random samples as per AQL table - usually 5% of lot size
+checks done: visual (damage, moisture, contamination), weight verification against invoice, COA (certificate of analysis) from supplier checked against our spec sheet
+if pharma raw material - additional test sent to QC lab, takes 1-2 days, material stays in quarantine area with yellow tag
+gopal fills inspection report form (IR-07)
+if all ok: green tag applied to each bag/drum, ravi updates SAP GRN, material moved to main store
+if rejected: red tag, supplier notified, material stays in rejection bay, purchase dept raises NCR
+common issues: supplier sends wrong grade (happened 3 times this year with titanium dioxide), damaged packaging, quantity short
+gopal said sometimes inspector on night shift skips the COA check - this is a risk`,
+    plant: 'Central Warehouse', dept: 'Quality / Stores', industry: 'Pharmaceutical'
+  },
+  shift: {
+    notes: `shift handover process at nagpur pharma plant - talked to 3 shift incharges
+
+current practice is pretty informal - outgoing incharge tells incoming incharge verbally what happened
+problems: things get missed, if there's an incident no one has written record, regulatory audit found this as gap
+
+what should happen (from krishna, senior incharge):
+- 30 mins before shift end, outgoing incharge starts updating shift log
+- log must include: batches started/completed, any equipment breakdowns, quality holds, near misses or safety incidents, pending work orders, utility readings (temp, humidity in cleanrooms)
+- incoming incharge arrives 15 mins before shift start, reads the log
+- both incharges do a joint walkthrough of the floor together - this is important
+- outgoing points out any running processes, tagged equipment, anything unusual
+- incoming signs the log to confirm handover received
+- outgoing cannot leave until incoming has signed
+- if incoming is late, this creates problem - need escalation path
+- supervisor (plant manager) gets daily summary by 9am
+
+current pain: log is paper, hard to read handwriting, sometimes pages missing, no way to track if it was actually done`,
+    plant: 'Nagpur Pharma Unit', dept: 'Operations', industry: 'Pharmaceutical'
+  }
+};
+
+function loadDemo(key) {
+  const d = DEMOS[key];
+  document.getElementById('rawNotes').value = d.notes;
+  document.getElementById('metaPlant').value = d.plant;
+  document.getElementById('metaDept').value = d.dept;
+  document.getElementById('metaIndustry').value = d.industry;
+}
+
+// ── API KEY VALIDATION ──
+document.getElementById('apiKey').addEventListener('input', function() {
+  const v = this.value.trim();
+  const el = document.getElementById('apiStatus');
+  if (!v) { el.className = 'api-status'; el.textContent = 'Get free key at openrouter.ai'; return; }
+  if (v.length > 15) {
+    el.className = 'api-status ok'; el.textContent = '✓ Key looks valid';
+  } else {
+    el.className = 'api-status ok'; el.textContent = '✓ Key entered — ready to generate';
+  }
+});
+
+// ── LOADING STEPS ANIMATION ──
+let loadingInterval;
+function startLoadingAnimation() {
+  const steps = ['ls1','ls2','ls3','ls4'];
+  let i = 0;
+  steps.forEach(id => { document.getElementById(id).className = 'loading-step'; });
+  loadingInterval = setInterval(() => {
+    if (i > 0) document.getElementById(steps[i-1]).className = 'loading-step done';
+    if (i < steps.length) {
+      document.getElementById(steps[i]).className = 'loading-step active';
+      i++;
+    }
+  }, 1800);
+}
+function stopLoadingAnimation() {
+  clearInterval(loadingInterval);
+}
+
+// ── MAIN GENERATE FUNCTION ──
+let lastJSON = null;
+
+async function generateSOP() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const notes = document.getElementById('rawNotes').value.trim();
+
+  // Validation
+  if (!apiKey) return showError('Please enter your OpenRouter API key. Get one free at openrouter.ai');
+  // Debug: confirm key is being read
+  console.log('Using key:', apiKey.slice(0,10) + '...' + apiKey.slice(-4));
+  if (!notes || notes.length < 30) return showError('Please add some process notes (at least a few sentences).');
+
+  const plant = document.getElementById('metaPlant').value || 'Site TBD';
+  const dept = document.getElementById('metaDept').value || 'Department TBD';
+  const author = document.getElementById('metaAuthor').value || 'DT Cell';
+  const industry = document.getElementById('metaIndustry').value || 'Manufacturing';
+
+  // UI state
+  hideError();
+  setUIState('loading');
+  startLoadingAnimation();
+
+  const FULL_PROMPT = `You are an expert process engineer and technical writer specializing in manufacturing SOPs.
+Convert raw, messy process notes into a structured Standard Operating Procedure document.
+Return ONLY valid JSON with no markdown fences, no preamble, no explanation. Just the JSON object.
+
+JSON schema:
+{
+  "title": "string — concise SOP title",
+  "doc_id": "string — e.g. SOP-QC-001",
+  "version": "1.0",
+  "purpose": "string — 2-3 sentences explaining why this process exists and what it achieves",
+  "scope": {
+    "in_scope": ["array of strings — what this SOP covers"],
+    "out_of_scope": ["array of strings — what is explicitly excluded"]
+  },
+  "roles": [
+    {"role": "string", "initials": "string — 2-3 chars", "responsibilities": "string — one sentence"}
+  ],
+  "steps": [
+    {
+      "number": 1,
+      "title": "string — short step title",
+      "detail": "string — clear, actionable instruction",
+      "responsible": "string — role name"
+    }
+  ],
+  "kpis": [
+    {"value": "string — e.g. ≤45 min", "label": "string — e.g. Max changeover time"}
+  ],
+  "exceptions": [
+    {
+      "scenario": "string — what can go wrong",
+      "action": "string — what to do",
+      "severity": "warning or danger"
+    }
+  ],
+  "flowchart_mermaid": "string — valid Mermaid flowchart TD code. Use simple node IDs like A, B, C. Include decision diamonds for key checks. Max 12 nodes."
+}
+
+Important:
+- Extract ALL steps including workarounds and tribal knowledge from the notes
+- Flag safety risks as danger severity exceptions
+- KPIs should be concrete and measurable
+- Mermaid code must be valid — use quotes around node labels with special chars
+
+Raw process notes:
+${notes}
+
+Context: Plant = ${plant}, Department = ${dept}, Industry = ${industry}, Author = ${author}
+
+Convert these into a complete SOP JSON document.`;
+
+  try {
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`,
+        'HTTP-Referer': 'https://kores-dt-cell.internal',
+        'X-Title': 'Kores SOP Generator'
+      },
+      body: JSON.stringify({
+        model: 'openrouter/auto',
+        max_tokens: 4000,
+        temperature: 0.3,
+        messages: [{ role: 'user', content: FULL_PROMPT }]
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      const msg = err?.error?.message || `API error ${response.status}`;
+      throw new Error(msg);
+    }
+
+    const data = await response.json();
+    const rawText = data.choices?.[0]?.message?.content || '';
+
+    // Parse JSON — strip fences if any
+    const clean = rawText.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+    const sop = JSON.parse(clean);
+    lastJSON = sop;
+
+    stopLoadingAnimation();
+    renderSOP(sop, plant, dept, author, industry);
+    setUIState('output');
+
+  } catch (err) {
+    stopLoadingAnimation();
+    setUIState('empty');
+    let msg = err.message || 'Unknown error';
+    if (msg.includes('400') || msg.includes('API_KEY_INVALID')) msg = 'Invalid API key. Get a free one at openrouter.ai';
+    if (msg.includes('429') || msg.includes('RESOURCE_EXHAUSTED')) msg = 'Rate limit hit. Wait a moment and try again.';
+    if (msg.includes('403')) msg = 'API key error. Make sure you copied the full key from openrouter.ai';
+    showError('Generation failed: ' + msg);
+    console.error(err);
+  }
+}
+
+// ── RENDER ──
+function renderSOP(sop, plant, dept, author, industry) {
+  // Header
+  const today = new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+  document.getElementById('outDocId').textContent = `${sop.doc_id || 'SOP-001'} · v${sop.version || '1.0'} · ${today}`;
+  document.getElementById('outTitle').textContent = sop.title || 'Standard Operating Procedure';
+
+  const meta = document.getElementById('outMeta');
+  meta.innerHTML = [
+    `<span class="sop-badge accent">${industry}</span>`,
+    `<span class="sop-badge">${plant}</span>`,
+    `<span class="sop-badge">${dept}</span>`,
+    `<span class="sop-badge">Author: ${author}</span>`
+  ].join('');
+
+  document.getElementById('outPurpose').textContent = sop.purpose || '';
+
+  // Scope
+  const inS = document.getElementById('outInScope');
+  const outS = document.getElementById('outOutScope');
+  inS.innerHTML = (sop.scope?.in_scope || []).map(s => `<li>${s}</li>`).join('');
+  outS.innerHTML = (sop.scope?.out_of_scope || []).map(s => `<li>${s}</li>`).join('');
+
+  // Roles
+  const rolesEl = document.getElementById('outRoles');
+  rolesEl.innerHTML = (sop.roles || []).map(r => `
+    <div class="role-row">
+      <div class="role-avatar">${(r.initials||r.role||'?').slice(0,2).toUpperCase()}</div>
+      <div>
+        <div class="role-name">${r.role}</div>
+        <div class="role-desc">${r.responsibilities}</div>
+      </div>
+    </div>`).join('');
+
+  // Steps
+  const stepsEl = document.getElementById('outSteps');
+  stepsEl.innerHTML = (sop.steps || []).map((s,i,arr) => `
+    <div class="step-row">
+      <div class="step-left">
+        <div class="step-num">${s.number||i+1}</div>
+        ${i < arr.length-1 ? '<div class="step-line"></div>' : ''}
+      </div>
+      <div class="step-content">
+        <div class="step-title">${s.title}</div>
+        <div class="step-detail">${s.detail}</div>
+        ${s.responsible ? `<span class="step-responsible">${s.responsible}</span>` : ''}
+      </div>
+    </div>`).join('');
+
+  // KPIs
+  const kpiEl = document.getElementById('outKPIs');
+  kpiEl.innerHTML = (sop.kpis || []).map(k => `
+    <div class="kpi-card">
+      <div class="kpi-value">${k.value}</div>
+      <div class="kpi-label">${k.label}</div>
+    </div>`).join('');
+
+  // Exceptions
+  const excEl = document.getElementById('outExceptions');
+  excEl.innerHTML = (sop.exceptions || []).map(e => `
+    <div class="exception-row ${e.severity==='danger'?'danger':''}">
+      <div>
+        <div class="exc-title">${e.scenario}</div>
+        <div class="exc-action">→ ${e.action}</div>
+      </div>
+    </div>`).join('');
+
+  // Flowchart
+  const fc = document.getElementById('outFlowchart');
+  fc.removeAttribute('data-processed');
+  fc.textContent = sop.flowchart_mermaid || 'flowchart TD\n  A[Start] --> B[End]';
+  mermaid.run({ nodes: [fc] });
+}
+
+// ── UI STATE ──
+function setUIState(state) {
+  document.getElementById('emptyState').style.display = state==='empty' ? 'flex' : 'none';
+  document.getElementById('loadingState').style.display = state==='loading' ? 'flex' : 'none';
+  document.getElementById('sopOutput').style.display = state==='output' ? 'block' : 'none';
+  const btn = document.getElementById('generateBtn');
+  btn.disabled = state==='loading';
+  btn.innerHTML = state==='loading'
+    ? '<div class="spinner"></div> Generating…'
+    : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg> Generate SOP';
+}
+
+// ── ERRORS ──
+function showError(msg) {
+  const el = document.getElementById('errorToast');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+function hideError() {
+  document.getElementById('errorToast').style.display = 'none';
+}
+
+// ── EXPORT FUNCTIONS ──
+function copyJSON() {
+  if (!lastJSON) return;
+  navigator.clipboard.writeText(JSON.stringify(lastJSON, null, 2))
+    .then(() => alert('JSON copied to clipboard!'))
+    .catch(() => alert('Could not copy — try selecting text manually.'));
+}
+
+function downloadMarkdown() {
+  if (!lastJSON) return;
+  const s = lastJSON;
+  const today = new Date().toLocaleDateString('en-IN');
+  let md = `# ${s.title}\n\n`;
+  md += `**Document ID:** ${s.doc_id} | **Version:** ${s.version} | **Date:** ${today}\n\n`;
+  md += `## Purpose\n${s.purpose}\n\n`;
+  md += `## Scope\n### In Scope\n${(s.scope?.in_scope||[]).map(i=>`- ${i}`).join('\n')}\n`;
+  md += `### Out of Scope\n${(s.scope?.out_of_scope||[]).map(i=>`- ${i}`).join('\n')}\n\n`;
+  md += `## Roles & Responsibilities\n${(s.roles||[]).map(r=>`- **${r.role}**: ${r.responsibilities}`).join('\n')}\n\n`;
+  md += `## Procedure\n${(s.steps||[]).map(st=>`### Step ${st.number}: ${st.title}\n${st.detail}\n*Responsible: ${st.responsible}*`).join('\n\n')}\n\n`;
+  md += `## KPIs\n${(s.kpis||[]).map(k=>`- **${k.value}** — ${k.label}`).join('\n')}\n\n`;
+  md += `## Exception Handling\n${(s.exceptions||[]).map(e=>`### ${e.scenario}\n→ ${e.action} *(${e.severity})*`).join('\n\n')}\n\n`;
+  md += `## Process Flowchart\n\`\`\`mermaid\n${s.flowchart_mermaid}\n\`\`\`\n`;
+
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `${s.doc_id || 'SOP'}.md`;
+  a.click();
+}
+</script>
+</body>
+</html>
